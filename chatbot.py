@@ -5,31 +5,30 @@ from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) # OOP
+client = OpenAI(api_key=os.getenv("OPENAI_APIKEY")) # OOP
 
 # Input from user
 prompt = input("User: ")
 
-# Response API - lightweight
-response = client.responses.create(
-    model="gpt-4o-mini",
-    instructions="Respond concisely in 10 words.", # AI model
-    input=prompt,
-)
+# # Response API - lightweight
+# response = client.responses.create(
+#     model="gpt-4o-mini",
+#     instructions="Respond concisely in 10 words.", # AI model
+#     input=prompt,
+# )
+#print("Bot: ", response.output_text)
 
-print("Bot: ", response.output_text)
 
+# # Chat Completion - classic
+# completion = client.chat.completions.create(
+#     model="gpt-4o-mini",
+#     messages=[
+#         {"role": "system",  "content": "Respond concisely within 10 words."},
+#         {"role": "user",    "content": prompt},
+#     ],
+# )
 
-# Chat Completion - classic
-completion = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system",  "content": "Respond concisely within 10 words."},
-        {"role": "user",    "content": prompt},
-    ],
-)
-
-print("Bot:", completion.choices[0].message.content)
+# print("Bot:", completion.choices[0].message.content)
 
 
 # Streaming
