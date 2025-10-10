@@ -32,19 +32,19 @@ prompt = input("User: ")
 
 
 # Streaming
-stream = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system",  "content": "Respond concisely in two to three sentences."},
-        {"role": "user",    "content": prompt}
-    ],
-    stream=True
-)
+# stream = client.chat.completions.create(
+#     model="gpt-4o-mini",
+#     messages=[
+#         {"role": "system",  "content": "Respond concisely in two to three sentences."},
+#         {"role": "user",    "content": prompt}
+#     ],
+#     stream=True
+# )
 
-# Print as tokens arrive
-print("Bot:", end=" ", flush=True)
-for chunk in stream:
-    delta = chunk.choices[0].delta.content
-    if delta:
-        print(delta, end="", flush=True)
-print()
+# # Print as tokens arrive
+# print("Bot:", end=" ", flush=True)
+# for chunk in stream:
+#     delta = chunk.choices[0].delta.content
+#     if delta:
+#         print(delta, end="", flush=True)
+# print()
