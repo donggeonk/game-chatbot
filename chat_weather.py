@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import os
 import json
+from WeatherResponse import get_weather #같은 폴더/레벨에서는 접근 가능
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_APIKEY"))
@@ -19,28 +20,40 @@ def get_samsungUser(city):
     else:
         return 1
     
-functions = [{
-    "type": "function",
-    "name": "get_temperature",
-    "description": "Get the current temperature for the provided city in celsius.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "city": {"type":"string","description": "Name of the city"},
-        },
-        "required":["city"],},
-},
-{
-    "type": "function",
-    "name": "get_samsungUser",
-    "description": "Get the current Samsung phone user for the provided city in million.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "city": {"type":"string","description": "Name of the city"},
-        },
-        "required":["city"],},
-}
+functions = [
+    # {
+    # "type": "function",
+    # "name": "get_temperature",
+    # "description": "Get the current temperature for the provided city in celsius.",
+    # "parameters": {
+    #     "type": "object",
+    #     "properties": {
+    #         "city": {"type":"string","description": "Name of the city"},
+    #     },
+    #     "required":["city"],},
+    # },
+    # {
+    #     "type": "function",
+    #     "name": "get_samsungUser",
+    #     "description": "Get the current Samsung phone user for the provided city in million.",
+    #     "parameters": {
+    #         "type": "object",
+    #         "properties": {
+    #             "city": {"type":"string","description": "Name of the city"},
+    #         },
+    #         "required":["city"],},
+    # }
+    {
+        "type": "function",
+        "name": "get_weather",
+        "description": "get the current weather data including temperature, description, humidity, and wind speed in kph.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type":"string","description": "Name of the city"},
+            },
+            "required":["city"],},
+    }
 ]
 
 user_input = input("User: ")
@@ -61,17 +74,20 @@ if message.function_call:
     func_name = message.function_call.name
     args = json.loads(message.function_call.arguments)
 
-    if func_name == "get_temperature":
-        temp = get_temperature(**args) #arguments={"city":"seoul"} ** means take value 
-        function_response = {"temperature": temp}
-    elif func_name == "get_samsungUser":
-        temp = get_samsungUser(**args)
-        function_response = {"Samsung phone user count": temp}
+    # if func_name == "get_temperature":
+    #     temp = get_temperature(**args) #arguments={"city":"seoul"} args = dictionary ** means take value / * means key
+    #     function_response = {"temperature": temp}
+    # elif func_name == "get_samsungUser":
+    #     temp = get_samsungUser(**args)
+    #     function_response = {"Samsung phone user count": temp}
+    if func_name == "get_weather":
+        temp = get_weather(**args)
+        function_response = {"weather data": temp}
     else:
         function_response = {"unknown function":func_name}
 
     followup_messages = [
-        {"role":"system","content":"Reply to user using the data from function call."},
+        {"role":"system","content":"Reply to user using the data from function call. Only used requested by the user"},
         {"role":"user","content": user_input},
         message, # first agent
         {
