@@ -3,53 +3,17 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import os
 import json
+from weather import get_weather
 
 # create LLM client
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# API - bring online data to my use
-
-# Inventory -> LLM can use information from this function to answer user's questions
-def get_temperature(city):
-    if city == "Seoul":
-        return 20
-    if city == "New York":
-        return 15
-    if city == "Tokyo":
-        return 25
-    if city == "Boston":
-        return 17
-    else:
-        return None
-
-def describe_weather(city):
-    if city == "Seoul":
-        return "Sunny"
-    if city == "New York":
-        return "Cloudy"
-    if city == "Tokyo":
-        return "Rainy"
-    if city == "Boston":
-        return "Snowy"
-    else:
-        return None
-
 # Define the tool for the LLM to call - tell AI abotut the function
 functions = [{
     "type": "function",
-    "name": "get_temperature",
-    "description": "Get the current temperature for the provided city in celsius.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "city": {"type": "string", "description": "Name of the city"},
-        },
-        "required": ["city"],},
-    },{
-    "type": "function",
-    "name": "get_temperature",
-    "description": "Get the current temperature for the provided city in celsius.",
+    "name": "get_weather",
+    "description": "Get the current temperature in celsius, weather description (sunny, cloudy, etc), humidity in percent, and wind speed in kph for the provided city.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -60,9 +24,9 @@ functions = [{
 ]
 
 user_input = input("User: ")
-# instructions tell the AI that it can call a function to get the temperature
+# instructions tell the AI that it can call a function to get the weather
 input_messages = [{"role": "user", "content": user_input},
-                  {"role": "system", "content": "You can call a function to get the temperature. If no function needed, do not call any function and respond concisely."}]
+                  {"role": "system", "content": "You can call a function to get the infromation on current temperature in celsius, weather description (sunny, cloudy, etc), humidity in percent, and wind speed in kph. If no function needed, do not call any function and respond concisely."}]
 
 
 response = client.chat.completions.create(
@@ -79,19 +43,19 @@ print("First LLM response:", message)
 
 # If it decided to call get_weather:
 if message.function_call:
-    # function_call=FunctionCall(arguments='{"city":"Seoul"}', name='get_temperature')
+    # function_call=FunctionCall(arguments='{"city":"Seoul"}', name='get_weather')
     func_name = message.function_call.name # get_weather
     args = json.loads(message.function_call.arguments) # {"city" : "Seoul"}
 
-    if func_name == "get_temperature":
-        temp = get_temperature(**args) # key * value **
-        function_response = { "temperature": temp }
+    if func_name == "get_weather":
+        weather_info = get_weather(**args) # key * value **
+        function_response = { "weather": weather_info }
     else:
         function_response = { "unknown function" : func_name }
 
     # system message to tell the LLM that it can use the function call result to generate a followup response
     followup_messages = [
-        {"role": "system", "content": "Reply to user with the current weather in the city using the data from function call."},
+        {"role": "system", "content": "You are a friendly assistant that answers in human-like sentences without symbols or bullet points. Reply to user with the current weather in the city using the data from function call. You have access to current temperature in celsius, weather description (sunny, cloudy, etc), humidity in percent, and wind speed in kph. Only take the data requested by the user."},
         {"role": "user",   "content": user_input},
         message,  # the function_call event
         {

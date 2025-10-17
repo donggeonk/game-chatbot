@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()  
 API_KEY = os.getenv("WEATHER_API_KEY")
 
-def get_weather(city: str) -> float:
+def get_weather(city: str) -> dict:
     endpoint = "https://api.openweathermap.org/data/2.5/weather"
     params = {
         "q": city,
@@ -14,11 +14,12 @@ def get_weather(city: str) -> float:
         "units": "metric"
     }
     resp = requests.get(endpoint, params=params)
-    resp.raise_for_status() # Raise an error for bad responses (4xx, 5xx)
-    # print(resp)
 
+    resp.raise_for_status() # Raise an error for bad responses (4xx, 5xx)
+
+    # print("Before json", resp)
     data = resp.json()
-    # print(data)
+    # print("After json", data)
     weather = {
         "temp_c": data["main"]["temp"],
         "description": data["weather"][0]["description"],
@@ -29,16 +30,4 @@ def get_weather(city: str) -> float:
     return weather
 
 # city = input("Enter city name: ")
-# print(get_weather(city))
-
-# try:
-#     weather = get_weather(city)
-#     print(f"Current weather in {city}:")
-#     print(f"Temperature: {weather['temp_c']}°C")
-#     print(f"Conditions: {weather['description']}")
-#     print(f"Humidity: {weather['humidity_pct']}%")
-#     print(f"Wind Speed: {weather['wind_kph']:.1f} km/h")
-# except requests.HTTPError as e:
-#     print("Failed to fetch weather:", e)
-# except KeyError:
-#     print("Unexpected response format")
+# print(get_weather("Seoul"))
